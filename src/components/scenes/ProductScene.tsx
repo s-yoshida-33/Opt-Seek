@@ -162,26 +162,27 @@ function ProductCard({ product, position, index }: ProductCardProps) {
   )
 }
 
-function StarField() {
-  const COUNT = 800
-  const geoRef = useRef<THREE.BufferGeometry>(null)
-
+function GoldDust() {
+  const COUNT = 1200
   const positions = useMemo(() => {
     const pos = new Float32Array(COUNT * 3)
     for (let i = 0; i < COUNT; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 40
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 40
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 40 - 10
+      pos[i * 3]     = (Math.random() - 0.5) * 36
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 36
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 30 - 8
     }
     return pos
   }, [])
-
+  const ref = useRef<THREE.Points>(null)
+  useFrame(({ clock }) => {
+    if (ref.current) ref.current.rotation.y = clock.getElapsedTime() * 0.015
+  })
   return (
-    <points>
-      <bufferGeometry ref={geoRef}>
+    <points ref={ref}>
+      <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.03} color="#8ab4d4" transparent opacity={0.6} sizeAttenuation />
+      <pointsMaterial size={0.025} color="#d4a955" transparent opacity={0.45} sizeAttenuation />
     </points>
   )
 }
@@ -228,11 +229,12 @@ export function ProductScene() {
 
   return (
     <>
-      <ambientLight intensity={0.3} color="#001133" />
-      <pointLight position={[5, 5, 5]} intensity={1.5} color="#0055ff" />
-      <pointLight position={[-5, -5, 3]} intensity={1.0} color="#004499" />
+      <ambientLight intensity={0.2} color="#2a1a08" />
+      <pointLight position={[0,  6, 4]}  intensity={1.8} color="#f5d78a" />
+      <pointLight position={[4, -4, 3]}  intensity={0.8} color="#e8b4a0" />
+      <pointLight position={[-4, 2, 2]}  intensity={0.6} color="#c8a870" />
 
-      <StarField />
+      <GoldDust />
       <ProductCards />
 
       <OrbitControls
@@ -255,7 +257,7 @@ export function ProductScene() {
               fontFamily: "'Cormorant Garamond', Georgia, serif",
               fontSize: 'clamp(10px, 1.2vw, 12px)',
               letterSpacing: '0.5em',
-              color: 'rgba(120,180,255,0.5)',
+              color: 'rgba(210,175,110,0.55)',
               textTransform: 'uppercase',
               marginBottom: '6px',
             }}>
@@ -266,7 +268,7 @@ export function ProductScene() {
               fontSize: 'clamp(22px, 3vw, 32px)',
               fontWeight: 300,
               letterSpacing: '0.2em',
-              color: 'rgba(220,235,255,0.9)',
+              color: 'rgba(245,230,200,0.9)',
             }}>
               Wedding Collection
             </h1>
@@ -277,7 +279,7 @@ export function ProductScene() {
             <p style={{
               fontSize: '11px',
               letterSpacing: '0.3em',
-              color: 'rgba(100,160,220,0.5)',
+              color: 'rgba(210,175,110,0.45)',
               textTransform: 'uppercase',
             }}>
               Drag to explore · Touch to select
@@ -290,8 +292,8 @@ export function ProductScene() {
             className="pointer-events-auto absolute top-8 left-8"
             style={{
               background: 'transparent',
-              border: '1px solid rgba(100,160,255,0.3)',
-              color: 'rgba(150,200,255,0.7)',
+              border: '1px solid rgba(210,175,110,0.3)',
+              color: 'rgba(230,200,150,0.7)',
               padding: '8px 20px',
               fontSize: '11px',
               letterSpacing: '0.3em',
