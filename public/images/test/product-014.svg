@@ -1,0 +1,63 @@
+<svg width="480" height="300" viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#1a0d12"/>
+      <stop offset="100%" stop-color="#3d1a24"/>
+    </linearGradient>
+    <linearGradient id="shimmer" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#d4748c" stop-opacity="0"/>
+      <stop offset="50%"  stop-color="#d4748c" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#d4748c" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="480" height="300" fill="url(#bg)"/>
+
+  <!-- Shimmer band -->
+  <rect width="480" height="300" fill="url(#shimmer)" transform="rotate(125.0, 240, 150)"/>
+
+  <!-- Outer border -->
+  <rect x="12" y="12" width="456" height="276"
+        fill="none" stroke="#d4748c" stroke-width="0.8" opacity="0.35"/>
+
+  <!-- Inner border -->
+  <rect x="22" y="22" width="436" height="256"
+        fill="none" stroke="#d4748c" stroke-width="0.4" opacity="0.20"/>
+
+  <!-- Corner ornaments -->
+  <g stroke="#d4748c" stroke-width="0.8" fill="none" opacity="0.55">
+    <path d="M12,36 L12,12 L36,12"/>
+    <path d="M444,12 L468,12 L468,36"/>
+    <path d="M468,264 L468,288 L444,288"/>
+    <path d="M36,288 L12,288 L12,264"/>
+  </g>
+
+  <!-- Category label -->
+  <text x="240" y="98"
+        font-family="'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif"
+        font-size="11" fill="#d4748c" opacity="0.65"
+        text-anchor="middle" letter-spacing="3">
+    演出
+  </text>
+
+  <!-- Item number (large) -->
+  <text x="240" y="162"
+        font-family="'Cormorant Garamond', 'Didot', Georgia, serif"
+        font-size="56" font-weight="300" fill="#f5c8d8" opacity="0.80"
+        text-anchor="middle" dominant-baseline="middle">
+    014
+  </text>
+
+  <!-- English name -->
+  <text x="240" y="208"
+        font-family="'Cormorant Garamond', Georgia, serif"
+        font-size="13" font-weight="300" fill="#f5c8d8" opacity="0.50"
+        text-anchor="middle" letter-spacing="2">
+    Champagne Tower
+  </text>
+
+  <!-- Horizontal rule -->
+  <line x1="180" y1="225" x2="300" y2="225"
+        stroke="#d4748c" stroke-width="0.5" opacity="0.30"/>
+</svg>

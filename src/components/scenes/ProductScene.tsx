@@ -283,10 +283,14 @@ function ProductCards() {
     const rand = seededRand(7)
     const PHI  = Math.PI * (3 - Math.sqrt(5))   // golden angle ≈ 137.5°
 
-    // Radii for 3 layers — scale outward a bit with card count
-    const rOuter = count > 30 ? 9.5 : count > 15 ? 8.0 : 6.8
-    const rMid   = count > 30 ? 7.0 : count > 15 ? 6.0 : 5.0
-    const rInner = count > 30 ? 5.0 : count > 15 ? 4.2 : 3.6
+    // Radii for 3 layers
+    // Layer names match the client brief:
+    //   wall  = カメラから最も遠い  (R 14–16)
+    //   shelf = 壁より少し手前      (R  9–11)
+    //   float = さらに手前          (R  5–7)
+    const rWall  = count > 50 ? 16.0 : count > 20 ? 15.0 : 14.0
+    const rShelf = count > 50 ? 11.0 : count > 20 ? 10.0 :  9.5
+    const rFloat = count > 50 ?  7.0 : count > 20 ?  6.5 :  5.5
 
     return products.map((_, i) => {
       // Fibonacci base angles (even coverage) + jitter (irregular feel)
@@ -298,18 +302,19 @@ function ProductCards() {
                       basePhi  + (rand()-0.5) * jitterScale))
       const theta = baseTheta + (rand()-0.5) * jitterScale * 2
 
-      // Layer assignment: ~60% wall, ~25% mid, ~15% inner
+      // Layer assignment: ~60% wall, ~25% shelf, ~15% float
       const layer = rand()
-      const r = layer < 0.60 ? rOuter + rand()*1.0
-              : layer < 0.85 ? rMid   + rand()*0.8
-              :                rInner + rand()*0.6
+      const r = layer < 0.60 ? rWall  + rand()*1.5   // wall:  14–17.5
+              : layer < 0.85 ? rShelf + rand()*1.2   // shelf:  9–12.2
+              :                rFloat + rand()*1.0   // float:  5–8
 
       const x = r * Math.sin(phi) * Math.cos(theta)
       const y = r * Math.cos(phi)
       const z = r * Math.sin(phi) * Math.sin(theta)
 
-      // Card scale: smaller when there are many cards
-      const baseScale = Math.max(0.50, 1.15 - count * 0.006) + rand() * 0.30
+      // Card scale: larger to compensate for greater distance
+      const distFactor = r / 9.0   // wall cards get bigger to stay readable
+      const baseScale  = (Math.max(0.55, 1.20 - count * 0.004) + rand() * 0.35) * distFactor
       const tiltX     = (rand()-0.5) * 0.24
       const tiltZ     = (rand()-0.5) * 0.18
 
@@ -374,11 +379,14 @@ export function ProductScene() {
 
       <OrbitControls
         enablePan={false}
-        enableZoom={false}
+        enableZoom
+        zoomSpeed={1.2}
+        minDistance={0.5}   // camera near center — see full panorama
+        maxDistance={12}    // zoom in toward shelf/float layers
         enableDamping
         dampingFactor={0.04}
         autoRotate
-        autoRotateSpeed={0.30}
+        autoRotateSpeed={0.28}
         makeDefault
       />
 
