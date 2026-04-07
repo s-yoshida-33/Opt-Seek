@@ -1,7 +1,8 @@
-import { useRef, useMemo, useState, useEffect } from 'react'
+import { useRef, useMemo, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Html, OrbitControls } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
+import gsap from 'gsap'
 import { useStore } from '../../store/useStore'
 import { products, type Product } from '../../data/products'
 import { Effects } from '../Effects'
@@ -196,7 +197,7 @@ const CARD_FRAG = /* glsl */`
   }
 `
 
-// ─── Product card ─────────────────────────────────────────────────────────────
+// ─── Product card with fly-toward-camera animation ───────────────────────────
 interface CardProps {
   product:   Product
   position:  [number, number, number]
@@ -205,11 +206,13 @@ interface CardProps {
 }
 
 function ProductCard({ product, position, baseScale, tilt }: CardProps) {
+  const groupRef = useRef<THREE.Group>(null)
   const meshRef  = useRef<THREE.Mesh>(null)
   const matRef   = useRef<THREE.ShaderMaterial>(null)
-  const [hovered, setHovered] = useState(false)
-  const goToDetail = useStore((s) => s.goToDetail)
-  const scaleVec   = useRef(new THREE.Vector3(baseScale, baseScale, baseScale))
+  const [hovered, setHovered]     = useState(false)
+  const [animating, setAnimating] = useState(false)
+  const startCardTransition = useStore((s) => s.startCardTransition)
+  const scaleVec = useRef(new THREE.Vector3(baseScale, baseScale, baseScale))
 
   const texture = useMemo(() => {
     if (!product.imageUrl || product.imageUrl.startsWith('#')) return null
@@ -223,12 +226,12 @@ function ProductCard({ product, position, baseScale, tilt }: CardProps) {
     uHasTexture: { value: texture ? 1.0 : 0.0 },
   }), [texture])
 
-  // Quaternion: face center (0,0,0) from sphere surface position + random tilt
+  // Face center + irregular tilt
   const quaternion = useMemo(() => {
     const dummy = new THREE.Object3D()
     dummy.position.set(...position)
     dummy.lookAt(0, 0, 0)
-    dummy.rotateY(Math.PI)        // flip so PlaneGeometry +Z faces inward
+    dummy.rotateY(Math.PI)
     dummy.rotateX(tilt[0])
     dummy.rotateZ(tilt[2])
     return dummy.quaternion.clone()
@@ -238,17 +241,51 @@ function ProductCard({ product, position, baseScale, tilt }: CardProps) {
     if (!matRef.current || !meshRef.current) return
     matRef.current.uniforms.uTime.value  = clock.elapsedTime
     matRef.current.uniforms.uHover.value +=
-      ((hovered ? 1.0 : 0.0) - matRef.current.uniforms.uHover.value) * 0.08
-    scaleVec.current.setScalar(hovered ? baseScale * 1.07 : baseScale)
-    meshRef.current.scale.lerp(scaleVec.current, 0.07)
+      ((hovered && !animating ? 1.0 : 0.0) - matRef.current.uniforms.uHover.value) * 0.08
+    if (!animating) {
+      scaleVec.current.setScalar(hovered ? baseScale * 1.07 : baseScale)
+      meshRef.current.scale.lerp(scaleVec.current, 0.07)
+    }
   })
 
+  const handleClick = () => {
+    if (animating) return
+    setAnimating(true)
+    setHovered(false)
+
+    const group = groupRef.current
+    if (!group) return
+
+    // Fly toward camera: move the group 68% of the way to the sphere center (origin)
+    // Cards face inward, so origin ≈ camera position.
+    const tl = gsap.timeline()
+
+    tl.to(group.position, {
+      x: position[0] * 0.32,
+      y: position[1] * 0.32,
+      z: position[2] * 0.32,
+      duration: 0.62,
+      ease: 'power3.in',
+    }, 0)
+
+    tl.to(group.scale, {
+      x: baseScale * 3.8,
+      y: baseScale * 3.8,
+      z: baseScale * 3.8,
+      duration: 0.62,
+      ease: 'power2.in',
+    }, 0)
+
+    // Notify store to: show black overlay + schedule scene change after 680 ms
+    startCardTransition(product)
+  }
+
   return (
-    <group position={position} quaternion={quaternion}>
+    <group ref={groupRef} position={position} quaternion={quaternion}>
       <mesh
         ref={meshRef}
-        onClick={() => goToDetail(product)}
-        onPointerEnter={() => { setHovered(true);  document.body.style.cursor = 'pointer' }}
+        onClick={handleClick}
+        onPointerEnter={() => { if (!animating) { setHovered(true);  document.body.style.cursor = 'pointer' } }}
         onPointerLeave={() => { setHovered(false); document.body.style.cursor = 'default' }}
       >
         <planeGeometry args={[1.6, 1.0, 1, 1]} />
@@ -339,25 +376,8 @@ function ProductCards() {
   </>
 }
 
-// ─── CSS fade-in on scene entry ───────────────────────────────────────────────
-function FadeInOverlay() {
-  const [opacity, setOpacity] = useState(1)
-  useEffect(() => {
-    const id = setTimeout(() => setOpacity(0), 80)
-    return () => clearTimeout(id)
-  }, [])
-  return (
-    <div style={{
-      position: 'absolute', inset: 0, background: '#000',
-      opacity, transition: 'opacity 1.0s ease',
-      pointerEvents: 'none', zIndex: 50,
-    }} />
-  )
-}
-
 // ─── Main scene ───────────────────────────────────────────────────────────────
 export function ProductScene() {
-  const goBack = useStore((s) => s.goBack)
   const { camera } = useThree()
 
   useMemo(() => {
@@ -391,30 +411,6 @@ export function ProductScene() {
       />
 
       <Effects bloomIntensity={1.5} bloomThreshold={0.10} />
-
-      <Html fullscreen>
-        <FadeInOverlay />
-        <div className="w-full h-full pointer-events-none" style={{ position: 'relative' }}>
-          <button
-            onClick={goBack}
-            className="pointer-events-auto"
-            style={{
-              position: 'absolute', top: '6%', left: '6%',
-              background: 'transparent',
-              border: '1px solid rgba(210,175,110,0.28)',
-              color: 'rgba(230,200,150,0.62)',
-              padding: '8px 18px',
-              fontSize: '10px',
-              letterSpacing: '0.32em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            ← Back
-          </button>
-        </div>
-      </Html>
     </>
   )
 }

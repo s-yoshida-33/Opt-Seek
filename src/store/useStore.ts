@@ -7,6 +7,8 @@ interface AppState {
   scene: Scene
   selectedProduct: Product | null
   transitionProgress: number
+  // Product-select transition: card flies toward camera before detail opens
+  cardTransition: boolean
   setScene: (scene: Scene) => void
   setSelectedProduct: (product: Product | null) => void
   setTransitionProgress: (progress: number) => void
@@ -14,12 +16,14 @@ interface AppState {
   goToDetail: (product: Product) => void
   goToIdling: () => void
   goBack: () => void
+  startCardTransition: (product: Product) => void
 }
 
 export const useStore = create<AppState>((set, get) => ({
   scene: 'idling',
   selectedProduct: null,
   transitionProgress: 0,
+  cardTransition: false,
 
   setScene: (scene) => set({ scene }),
   setSelectedProduct: (product) => set({ selectedProduct: product }),
@@ -30,7 +34,7 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   goToDetail: (product) => {
-    set({ selectedProduct: product, scene: 'detail' })
+    set({ selectedProduct: product, scene: 'detail', cardTransition: false })
   },
 
   goToIdling: () => {
@@ -44,5 +48,13 @@ export const useStore = create<AppState>((set, get) => ({
     } else if (scene === 'products') {
       set({ scene: 'idling', transitionProgress: 0 })
     }
+  },
+
+  // Kick off the card-fly animation → after delay, open detail
+  startCardTransition: (product) => {
+    set({ cardTransition: true, selectedProduct: product })
+    setTimeout(() => {
+      get().goToDetail(product)
+    }, 680)
   },
 }))
