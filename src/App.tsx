@@ -1,10 +1,10 @@
 import { Canvas } from '@react-three/fiber'
 import { Suspense } from 'react'
 import { useStore } from './store/useStore'
-import { IdlingScene }    from './components/scenes/IdlingScene'
-import { TransitionScene } from './components/scenes/TransitionScene'
-import { ProductScene }   from './components/scenes/ProductScene'
-import { DetailScene }    from './components/scenes/DetailScene'
+import { IdlingScene }     from './components/scenes/IdlingScene'
+import { CinematicScene }  from './components/scenes/CinematicScene'
+import { ProductScene }    from './components/scenes/ProductScene'
+import { DetailScene }     from './components/scenes/DetailScene'
 
 // ─── Scene router (Three.js only, no HTML overlays) ──────────────────────────
 function SceneRouter() {
@@ -12,7 +12,7 @@ function SceneRouter() {
   return (
     <>
       {scene === 'idling'     && <IdlingScene />}
-      {scene === 'transition' && <TransitionScene />}
+      {scene === 'cinematic'  && <CinematicScene />}
       {scene === 'products'   && <ProductScene />}
       {scene === 'detail'     && <DetailScene />}
     </>
@@ -45,7 +45,7 @@ function AppUI() {
           opacity:    cardTransition ? 1 : 0,
           transition: cardTransition
             ? 'opacity 0.50s cubic-bezier(0.4, 0, 1, 1)'
-            : 'opacity 0.0s',
+            : 'opacity 0.55s cubic-bezier(0, 0, 0.6, 1)',
           pointerEvents: 'none',
           zIndex: 30,
         }}

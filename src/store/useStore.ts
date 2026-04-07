@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { Product } from '../data/products'
 
-export type Scene = 'idling' | 'transition' | 'products' | 'detail'
+export type Scene = 'idling' | 'transition' | 'cinematic' | 'products' | 'detail'
 
 interface AppState {
   scene: Scene
@@ -17,6 +17,8 @@ interface AppState {
   goToIdling: () => void
   goBack: () => void
   startCardTransition: (product: Product) => void
+  showOverlay: () => void
+  hideOverlay: () => void
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -30,7 +32,7 @@ export const useStore = create<AppState>((set, get) => ({
   setTransitionProgress: (progress) => set({ transitionProgress: progress }),
 
   goToProducts: () => {
-    set({ scene: 'transition', transitionProgress: 0 })
+    set({ scene: 'cinematic', transitionProgress: 0 })
   },
 
   goToDetail: (product) => {
@@ -49,6 +51,9 @@ export const useStore = create<AppState>((set, get) => ({
       set({ scene: 'idling', transitionProgress: 0 })
     }
   },
+
+  showOverlay: () => set({ cardTransition: true }),
+  hideOverlay: () => set({ cardTransition: false }),
 
   // Kick off the card-fly animation → after delay, open detail
   // Phase 1 (fly to center): 0.55 s
