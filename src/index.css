@@ -7,31 +7,43 @@
   color-scheme: dark;
 }
 
-body {
-  background-color: #000308;
-  color: #e8f4ff;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
   overflow: hidden;
-  width: 100vw;
-  height: 100vh;
+  touch-action: none;
 }
 
 #root {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+}
+
+/* Portrait stage: 9:16 aspect ratio, centered with letterbox */
+#stage {
   position: relative;
+  /* Fill height on portrait devices, constrain by width on landscape */
+  width: min(100vw, calc(100vh * 9 / 16));
+  height: min(100vh, calc(100vw * 16 / 9));
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  background-color: #000308;
 }
 
-.font-cormorant {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-}
-
-.scene-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.scene-overlay.interactive {
-  pointer-events: auto;
+/* Prevent scroll bounce on iOS */
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    height: -webkit-fill-available;
+  }
 }

@@ -21,7 +21,7 @@ function SceneRouter() {
 
 export default function App() {
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#000308' }}>
+    <div id="stage">
       <Canvas
         gl={{ antialias: true }}
         camera={{ fov: 60, near: 0.1, far: 1000, position: [0, 0, 5] }}
