@@ -25,8 +25,12 @@ export default function App() {
       <Canvas
         gl={{ antialias: true }}
         camera={{ fov: 60, near: 0.1, far: 1000, position: [0, 0, 5] }}
-        style={{ position: 'absolute', inset: 0 }}
+        style={{ position: 'absolute', inset: 0, touchAction: 'none' }}
         dpr={[1, 2]}
+        onCreated={({ gl }) => {
+          // Ensure canvas captures all pointer events
+          gl.domElement.style.touchAction = 'none'
+        }}
       >
         <color attach="background" args={['#000308']} />
         <Suspense fallback={null}>

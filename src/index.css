@@ -30,6 +30,12 @@ html, body {
   background-color: #000000;
 }
 
+/* Ensure canvas element itself captures all pointer/touch events */
+canvas {
+  touch-action: none !important;
+  outline: none;
+}
+
 /* Portrait stage: 9:16 aspect ratio, centered with letterbox */
 #stage {
   position: relative;
