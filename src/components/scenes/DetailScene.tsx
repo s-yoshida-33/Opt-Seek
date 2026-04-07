@@ -154,7 +154,6 @@ function FloatingOrbs({ accentColor }: { accentColor: string }) {
 
 export function DetailScene() {
   const selectedProduct = useStore((s) => s.selectedProduct)
-  const goBack = useStore((s) => s.goBack)
   const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -253,28 +252,6 @@ export function DetailScene() {
               {selectedProduct.price}
             </p>
           </div>
-
-          {/* Back button */}
-          <button
-            onClick={goBack}
-            style={{
-              position: 'absolute',
-              top: '32px',
-              left: '32px',
-              background: 'transparent',
-              border: `1px solid ${selectedProduct.accentColor}44`,
-              color: `${selectedProduct.accentColor}`,
-              padding: '10px 24px',
-              fontSize: '11px',
-              letterSpacing: '0.35em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-              opacity: 0.8,
-            }}
-          >
-            ← Back
-          </button>
 
           {/* Product ID */}
           <div style={{

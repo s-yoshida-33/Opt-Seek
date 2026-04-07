@@ -167,6 +167,7 @@ const CARD_VERT = /* glsl */`
 const CARD_FRAG = /* glsl */`
   uniform float uTime;
   uniform float uHover;
+  uniform float uFade;          // 1.0=visible  0.0=transparent (phase-2 fade)
   uniform sampler2D uTexture;
   uniform float uHasTexture;
   varying vec2 vUv;
@@ -193,7 +194,8 @@ const CARD_FRAG = /* glsl */`
     color += shimmer * pearl;
     if(uHasTexture < 0.5){ float v=1.-length((uv-.5)*1.4); color*=0.5+v*0.5; }
 
-    gl_FragColor = vec4(color, 0.80 + border*0.18 + uHover*0.12);
+    float alpha = (0.80 + border*0.18 + uHover*0.12) * uFade;
+    gl_FragColor = vec4(color, alpha);
   }
 `
 
@@ -209,9 +211,10 @@ function ProductCard({ product, position, baseScale, tilt }: CardProps) {
   const groupRef = useRef<THREE.Group>(null)
   const meshRef  = useRef<THREE.Mesh>(null)
   const matRef   = useRef<THREE.ShaderMaterial>(null)
-  const [hovered, setHovered]     = useState(false)
+  const [hovered,  setHovered]  = useState(false)
   const [animating, setAnimating] = useState(false)
   const startCardTransition = useStore((s) => s.startCardTransition)
+  const { camera }          = useThree()
   const scaleVec = useRef(new THREE.Vector3(baseScale, baseScale, baseScale))
 
   const texture = useMemo(() => {
@@ -222,6 +225,7 @@ function ProductCard({ product, position, baseScale, tilt }: CardProps) {
   const uniforms = useMemo(() => ({
     uTime:       { value: 0 },
     uHover:      { value: 0 },
+    uFade:       { value: 1.0 },   // phase-2 fade-out
     uTexture:    { value: texture ?? new THREE.Texture() },
     uHasTexture: { value: texture ? 1.0 : 0.0 },
   }), [texture])
@@ -256,28 +260,46 @@ function ProductCard({ product, position, baseScale, tilt }: CardProps) {
     const group = groupRef.current
     if (!group) return
 
-    // Fly toward camera: move the group 68% of the way to the sphere center (origin)
-    // Cards face inward, so origin ≈ camera position.
+    // ── Target position: 1.8 units in front of camera ─────────────────────
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion)
+    const centerPos = camera.position.clone().add(forward.multiplyScalar(1.8))
+
+    // ── Target quaternion: card aligned with screen (faces camera straight) ─
+    const dummy = new THREE.Object3D()
+    dummy.position.copy(centerPos)
+    dummy.lookAt(camera.position)
+    dummy.rotateY(Math.PI)          // flip front face toward camera
+    const centerQuat = dummy.quaternion.clone()
+
     const tl = gsap.timeline()
 
+    // ── Phase 1 (0 → 0.55 s): fly to center, straighten, medium scale ──────
     tl.to(group.position, {
-      x: position[0] * 0.32,
-      y: position[1] * 0.32,
-      z: position[2] * 0.32,
-      duration: 0.62,
-      ease: 'power3.in',
+      x: centerPos.x, y: centerPos.y, z: centerPos.z,
+      duration: 0.55, ease: 'power2.out',
     }, 0)
-
+    tl.to(group.quaternion, {
+      x: centerQuat.x, y: centerQuat.y,
+      z: centerQuat.z, w: centerQuat.w,
+      duration: 0.55, ease: 'power2.out',
+    }, 0)
     tl.to(group.scale, {
-      x: baseScale * 3.8,
-      y: baseScale * 3.8,
-      z: baseScale * 3.8,
-      duration: 0.62,
-      ease: 'power2.in',
+      x: 2.6, y: 2.6, z: 2.6,
+      duration: 0.55, ease: 'power2.out',
     }, 0)
 
-    // Notify store to: show black overlay + schedule scene change after 680 ms
-    startCardTransition(product)
+    // ── Phase 2 (0.55 → 0.90 s): expand + fade out ──────────────────────────
+    tl.to(group.scale, {
+      x: 10, y: 10, z: 10,
+      duration: 0.35, ease: 'power2.in',
+    })
+    tl.to(uniforms.uFade, {
+      value: 0,
+      duration: 0.35, ease: 'power1.in',
+    }, '-=0.35')
+
+    // ── Trigger black curtain at start of phase 2 ──────────────────────────
+    tl.call(() => startCardTransition(product), [], 0.55)
   }
 
   return (

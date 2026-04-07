@@ -51,10 +51,13 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   // Kick off the card-fly animation → after delay, open detail
+  // Phase 1 (fly to center): 0.55 s
+  // Phase 2 (expand + fade): 0.35 s  → total 0.90 s
+  // Add 80 ms buffer → 980 ms before scene switch
   startCardTransition: (product) => {
     set({ cardTransition: true, selectedProduct: product })
     setTimeout(() => {
       get().goToDetail(product)
-    }, 680)
+    }, 980)
   },
 }))
