@@ -205,7 +205,7 @@ export function DetailScene() {
               fontSize: 'clamp(32px, 6vw, 64px)',
               fontWeight: 300,
               letterSpacing: '0.1em',
-              color: 'rgba(230,240,255,0.95)',
+              color: 'rgba(245,232,210,0.95)',
               lineHeight: 1.1,
               marginBottom: '8px',
             }}>
@@ -216,7 +216,7 @@ export function DetailScene() {
               fontFamily: "'Cormorant Garamond', Georgia, serif",
               fontSize: 'clamp(14px, 2vw, 18px)',
               fontStyle: 'italic',
-              color: 'rgba(180,210,255,0.6)',
+              color: 'rgba(210,185,140,0.6)',
               letterSpacing: '0.08em',
               marginBottom: '28px',
             }}>
@@ -235,7 +235,7 @@ export function DetailScene() {
               fontFamily: "'Inter', sans-serif",
               fontSize: 'clamp(13px, 1.6vw, 15px)',
               fontWeight: 300,
-              color: 'rgba(190,220,255,0.7)',
+              color: 'rgba(220,200,170,0.72)',
               lineHeight: 1.8,
               letterSpacing: '0.02em',
               marginBottom: '32px',
@@ -284,7 +284,7 @@ export function DetailScene() {
             fontFamily: 'Inter, sans-serif',
             fontSize: '10px',
             letterSpacing: '0.4em',
-            color: 'rgba(100,160,255,0.3)',
+            color: 'rgba(180,150,100,0.3)',
           }}>
             No.{selectedProduct.id}
           </div>

@@ -7,6 +7,7 @@ export interface Product {
   price: string
   color: string
   accentColor: string
+  imageUrl?: string   // optional: set to a file path when image is ready
 }
 
 export const products: Product[] = [
